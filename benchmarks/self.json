@@ -1,0 +1,30 @@
+{
+  "name": "codescope-self-v0.1",
+  "cases": [
+    {
+      "id": "security-filter",
+      "query": "Where are credential files and build artifacts excluded from repository search?",
+      "expectedPaths": ["src/security.ts"]
+    },
+    {
+      "id": "hybrid-ranking",
+      "query": "Where are lexical and embedding similarity scores combined for semantic ranking?",
+      "expectedPaths": ["src/search.ts"]
+    },
+    {
+      "id": "mcp-tool",
+      "query": "Where is the semantic_search_code MCP tool defined?",
+      "expectedPaths": ["src/mcp.ts"]
+    },
+    {
+      "id": "incremental-cache",
+      "query": "How does the repository index reuse unchanged files between searches?",
+      "expectedPaths": ["src/indexer.ts"]
+    },
+    {
+      "id": "quality-gate",
+      "query": "Where does the benchmark reject token savings when retrieval quality regresses?",
+      "expectedPaths": ["src/benchmark.ts"]
+    }
+  ]
+}
