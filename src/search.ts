@@ -12,7 +12,11 @@ export async function searchCode(options: SearchOptions): Promise<SearchResponse
   const candidateK = Math.max(topK, options.candidateK ?? 40);
   const requestedMode = options.mode ?? "auto";
   const index = await buildIndex(options.root);
-  const lexical = rankBm25(options.query, index.chunks, candidateK);
+  const excluded = new Set(options.excludedPaths ?? []);
+  const eligibleChunks = excluded.size === 0
+    ? index.chunks
+    : index.chunks.filter((chunk) => !excluded.has(chunk.path));
+  const lexical = rankBm25(options.query, eligibleChunks, candidateK);
   const provider = requestedMode === "lexical" ? null : providerFromEnvironment();
 
   if (requestedMode === "semantic" && !provider) {
