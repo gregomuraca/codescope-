@@ -38,10 +38,13 @@ program
   .option("-r, --root <path>", "Git repository root", ".")
   .option("--mode <mode>", "auto, lexical, or semantic", "auto")
   .option("--output <path>", "Write full benchmark result JSON")
-  .action(async (opts: Record<string, string>) => {
+  .action(async (opts: Record<string, string | undefined>) => {
+    const suitePath = opts.suite;
+    if (!suitePath) throw new Error("--suite is required");
+
     const summary = await runBenchmark({
       root: path.resolve(opts.root ?? "."),
-      suitePath: path.resolve(opts.suite),
+      suitePath: path.resolve(suitePath),
       mode: (opts.mode ?? "auto") as SearchMode,
       ...(opts.output ? { outputPath: path.resolve(opts.output) } : {})
     });
@@ -52,7 +55,7 @@ program
 program
   .command("mcp")
   .option("-r, --root <path>", "Git repository root", ".")
-  .action(async (opts: Record<string, string>) => {
+  .action(async (opts: Record<string, string | undefined>) => {
     await runMcpServer(path.resolve(opts.root ?? "."));
   });
 
