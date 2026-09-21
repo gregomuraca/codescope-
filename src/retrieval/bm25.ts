@@ -41,7 +41,10 @@ export function rankBm25(query: string, chunks: CodeChunk[], limit: number): Ran
 
     const pathTokens = tokenize(chunk.path);
     if (queryTerms.some((term) => pathTokens.includes(term))) score *= 1.15;
-    if (chunk.symbol && queryTerms.some((term) => tokenize(chunk.symbol).includes(term))) score *= 1.2;
+
+    const symbol = chunk.symbol;
+    if (symbol && queryTerms.some((term) => tokenize(symbol).includes(term))) score *= 1.2;
+
     return { chunk, score };
   });
 
