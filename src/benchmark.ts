@@ -49,6 +49,12 @@ function hitAt(found: string[], expected: Set<string>, k: number): number {
   return found.slice(0, k).some((item) => expected.has(item)) ? 1 : 0;
 }
 
+function suitePathInsideRoot(root: string, suitePath: string): string[] {
+  const relative = path.relative(path.resolve(root), path.resolve(suitePath)).replaceAll("\\", "/");
+  if (!relative || relative.startsWith("../") || path.isAbsolute(relative)) return [];
+  return [relative];
+}
+
 export async function runBenchmark(options: {
   root: string;
   suitePath: string;
@@ -60,6 +66,7 @@ export async function runBenchmark(options: {
     throw new Error("Benchmark suite must contain a name and at least one case.");
   }
 
+  const excludedPaths = suitePathInsideRoot(options.root, options.suitePath);
   const rows: BenchmarkSummary["results"] = [];
   let effectiveMode: "lexical" | "semantic" = "lexical";
 
@@ -70,10 +77,11 @@ export async function runBenchmark(options: {
       query: testCase.query,
       mode: options.mode ?? "auto",
       topK: 5,
-      candidateK: 40
+      candidateK: 40,
+      excludedPaths
     });
     effectiveMode = search.mode;
-    const baseline = await lexicalFileBaseline(options.root, testCase.query, 5);
+    const baseline = await lexicalFileBaseline(options.root, testCase.query, 5, excludedPaths);
     const foundPaths = [...new Set(search.results.map((result) => result.path))];
     const baselinePaths = baseline.map((result) => result.path);
 
