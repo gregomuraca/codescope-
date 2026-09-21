@@ -10,12 +10,19 @@ export interface BaselineResult {
   estimatedTokens: number;
 }
 
-export async function lexicalFileBaseline(root: string, query: string, topK = 5): Promise<BaselineResult[]> {
+export async function lexicalFileBaseline(
+  root: string,
+  query: string,
+  topK = 5,
+  excludedPaths: string[] = []
+): Promise<BaselineResult[]> {
   const index = await buildIndex(root);
+  const excluded = new Set(excludedPaths);
   const terms = [...new Set(tokenize(query))];
   const byPath = new Map<string, number>();
 
   for (const chunk of index.chunks) {
+    if (excluded.has(chunk.path)) continue;
     const haystack = tokenize(`${chunk.path} ${chunk.symbol ?? ""} ${chunk.text}`);
     const unique = new Set(haystack);
     let score = 0;
