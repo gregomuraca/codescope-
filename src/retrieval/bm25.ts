@@ -1,9 +1,26 @@
+import path from "node:path";
 import type { CodeChunk } from "../types.js";
 import { tokenize } from "./tokenize.js";
 
 export interface RankedChunk {
   chunk: CodeChunk;
   score: number;
+}
+
+function sourcePrior(filePath: string): number {
+  const normalized = filePath.replaceAll("\\", "/").toLowerCase();
+  const extension = path.extname(normalized);
+
+  if (extension === ".md" || extension === ".mdx" || extension === ".rst" || extension === ".txt") {
+    return 0.55;
+  }
+  if (/(^|\/)(test|tests|spec|specs|fixtures)(\/|$)/.test(normalized) || /\.(test|spec)\.[^.]+$/.test(normalized)) {
+    return 0.8;
+  }
+  if (/(^|\/)(src|lib|app|packages)(\/|$)/.test(normalized)) {
+    return 1.15;
+  }
+  return 1;
 }
 
 export function rankBm25(query: string, chunks: CodeChunk[], limit: number): RankedChunk[] {
@@ -45,6 +62,7 @@ export function rankBm25(query: string, chunks: CodeChunk[], limit: number): Ran
     const symbol = chunk.symbol;
     if (symbol && queryTerms.some((term) => tokenize(symbol).includes(term))) score *= 1.2;
 
+    score *= sourcePrior(chunk.path);
     return { chunk, score };
   });
 
