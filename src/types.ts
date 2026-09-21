@@ -24,6 +24,7 @@ export interface SearchOptions {
   topK?: number;
   candidateK?: number;
   mode?: SearchMode;
+  excludedPaths?: string[];
 }
 
 export interface SearchResponse {
